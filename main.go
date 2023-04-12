@@ -21,7 +21,6 @@ func main() {
 	r.HandleFunc("/categories/{id}", jwtMiddleware(getCategorie)).Methods("GET")
 	r.HandleFunc("/categories/{id}", jwtMiddleware(updateCategorie)).Methods("PUT")
 	r.HandleFunc("/categories/{id}", jwtMiddleware(deleteCategorie)).Methods("DELETE")
-	r.HandleFunc("/relasi", jwtMiddleware(relasi)).Methods("GET")
 
 	fmt.Println("starting web server at localhost: 8080")
 	http.ListenAndServe(":8080", r)

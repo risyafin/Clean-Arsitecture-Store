@@ -10,11 +10,11 @@ import (
 )
 
 type product struct {
-	Id           int       `json:"id"`
-	Nama         string    `json:"nama"`
-	Price        int       `json:"price"`
-	Categorie_Id int       `json:"categorie_id"`
-	categorie    categorie `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Id          int      `json:"id"`
+	Nama        string   `json:"nama"`
+	Price       int      `json:"price"`
+	Category_Id int      `json:"category_id"`
+	Category    category `json:"category"`
 }
 
 func createProduct(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func createProduct(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic("Failed connect to databases")
 	}
-	result := db.Select("Nama", "Price").Create(&product)
+	result := db.Select("Nama", "Price", "Category_Id").Create(&product)
 	if result.Error != nil {
 		w.Write([]byte(result.Error.Error()))
 		return
@@ -44,7 +44,7 @@ func getAllProduct(w http.ResponseWriter, r *http.Request) {
 		panic("Failed connect to databases")
 	}
 	var products []product
-	result := db.Find(&products)
+	result := db.Preload("Category").Find(&products)
 
 	if result.Error != nil {
 		w.Write([]byte(result.Error.Error()))
@@ -65,8 +65,8 @@ func getProduct(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic("Failed connect to databases")
 	}
-	var products []product
-	result := db.First(&products, id)
+	var products product
+	result := db.Preload("Category").First(&products, id)
 
 	if result.Error != nil {
 		w.Write([]byte(result.Error.Error()))
