@@ -1,17 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"kasir/modules/categories"
 	"kasir/modules/logins"
 	"kasir/modules/products"
+	"net/http"
 
+	"github.com/gorilla/mux"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-var (
-	httpRouter Router = newMuxRouter()
-)
+// var (
+// 	httpRouter Router = newMuxRouter()
+// )
 
 func main() {
 	db, err := gorm.Open(mysql.Open("root:18543@tcp(localhost:3306)/db_store"), &gorm.Config{})
@@ -32,19 +35,21 @@ func main() {
 	loginHandler := logins.Handler{Usecase: loginUsecase}
 
 	const port string = ":8080"
+	r := mux.NewRouter()
 
-	httpRouter.POST("/login", loginHandler.Login)
-	httpRouter.GET("/products", jwtMiddleware(productHandler.GetAllProducts))
-	httpRouter.GET("/products/{id}", jwtMiddleware(productHandler.GetProduct))
-	httpRouter.POST("/products", jwtMiddleware(productHandler.CreateProduct))
-	httpRouter.PUT("/products/{id}", jwtMiddleware(productHandler.UpdateProduct))
-	httpRouter.DELETE("/products/{id}", jwtMiddleware(productHandler.DeleteProduct))
+	r.HandleFunc("/login", loginHandler.Login).Methods("POST")
+	r.HandleFunc("/products", jwtMiddleware(productHandler.GetAllProducts)).Methods("GET")
+	r.HandleFunc("/products/{id}", jwtMiddleware(productHandler.GetProduct)).Methods("GET")
+	r.HandleFunc("/products", jwtMiddleware(productHandler.CreateProduct)).Methods("POST")
+	r.HandleFunc("/products/{id}", jwtMiddleware(productHandler.UpdateProduct)).Methods("PUT")
+	r.HandleFunc("/products/{id}", jwtMiddleware(productHandler.DeleteProduct)).Methods("DELETE")
 
-	httpRouter.GET("/categories/{id}", jwtMiddleware(categoryHandler.GetCategory))
-	httpRouter.GET("/categories", jwtMiddleware(categoryHandler.GetAllCategories))
-	httpRouter.POST("/categories", jwtMiddleware(categoryHandler.CreateCategory))
-	httpRouter.PUT("/categories/{id}", jwtMiddleware(categoryHandler.UpdateCategory))
-	httpRouter.DELETE("/categories/{id}", jwtMiddleware(categoryHandler.DeleteCategory))
+	r.HandleFunc("/categories/{id}", jwtMiddleware(categoryHandler.GetCategory)).Methods("GET")
+	r.HandleFunc("/categories", jwtMiddleware(categoryHandler.GetAllCategories)).Methods("GET")
+	r.HandleFunc("/categories", jwtMiddleware(categoryHandler.CreateCategory)).Methods("POST")
+	r.HandleFunc("/categories/{id}", jwtMiddleware(categoryHandler.UpdateCategory)).Methods("PUT")
+	r.HandleFunc("/categories/{id}", jwtMiddleware(categoryHandler.DeleteCategory)).Methods("DELETE")
 
-	httpRouter.SERVE(port)
+	fmt.Println("lohalhost:8080")
+	http.ListenAndServe(port, r)
 }
