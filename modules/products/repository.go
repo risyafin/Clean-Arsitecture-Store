@@ -8,12 +8,14 @@ type Repository struct {
 
 func (repo Repository) GetAllProducts() ([]Product, error) {
 	var products []Product
-	result := repo.DB.Preload("Category").Find(&products)
+	result := repo.DB.Find(&products)
+	// result := repo.DB.Preload("Category").Find(&products)
 	return products, result.Error
 }
 func (repo Repository) GetProductById(id string) (*Product, error) {
 	var product *Product
-	result := repo.DB.Preload("Category").First(&product, id)
+	// result := repo.DB.Preload("Category").First(&product, id)
+	result := repo.DB.First(&product, id)
 	return product, result.Error
 }
 
@@ -24,9 +26,9 @@ func (repo Repository) CreateProduct(product Product) error {
 
 func (repo Repository) UpdateProductByID(id string, product Product) error {
 	result := repo.DB.Model(&Product{}).Where("id = ?", id).Updates(map[string]interface{}{
-		"nama":        product.Nama,
-		"price":       product.Price,
-		"category_id": product.Category_Id,
+		"name":  product.Name,
+		"price": product.Price,
+		// "category_id": product.Category_Id,
 	})
 	return result.Error
 }

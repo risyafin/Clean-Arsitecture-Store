@@ -22,7 +22,7 @@ func (handler Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	err = handler.Usecase.CreateProduct(product)
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write([]byte("succes"))
@@ -49,13 +49,15 @@ func (handler Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 
 	product, err := handler.Usecase.GetProductById(id)
 	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(err.Error()))
 		return
 	}
 
 	hasil, err := json.Marshal(product)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusNotFound)
+
 		return
 	}
 	w.Write(hasil)
